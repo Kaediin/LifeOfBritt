@@ -1,10 +1,12 @@
 package com.kaedin.lifeofbritt
 
 import android.Manifest
+import android.app.PendingIntent.getActivity
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.location.Location
 import android.location.LocationManager
 import android.os.Build
@@ -15,10 +17,10 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import android.view.LayoutInflater
 import android.view.View
-import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.api.GoogleApiClient
 import com.google.android.gms.location.LocationRequest
@@ -28,13 +30,15 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_maps.*
+import kotlinx.android.synthetic.main.activity_maps.view.*
+import kotlinx.android.synthetic.main.dialog_guess_word.view.*
 import kotlinx.android.synthetic.main.dialog_riddle.view.*
+import java.lang.Exception
 import java.lang.IndexOutOfBoundsException
-import java.text.DecimalFormat
 import java.util.*
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks,
@@ -47,6 +51,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Co
     private var currentIteration: Int = 0
     private var googleApiClient: GoogleApiClient? = null
     private var isCompleted: Boolean = false
+    private var isDone: Boolean = false
     private var popupContext: View? = null
     private var sp: SharedPreferences? = null
 
@@ -63,22 +68,37 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Co
             .addConnectionCallbacks(this).addOnConnectionFailedListener(this).build()
 
         sp = getSharedPreferences("progress", Context.MODE_PRIVATE)
-//        sp!!.edit().putInt("currentIteration", 5).apply() //FOR HARDCODING THE STAGE
         currentIteration = sp!!.getInt("currentIteration", 0)
         isCompleted = sp!!.getBoolean("isCompleted", false)
+        isDone = sp!!.getBoolean("isDone", false)
 
-        if (isCompleted){
-            startActivity(Intent(this, DoneActivity::class.java))
-        } else {
-
-            startup()
+        when {
+            isCompleted -> {
+                startActivity(Intent(this, DoneActivity::class.java))
+            }
+            isDone -> {
+                guessWord()
+            }
+            else -> {
+                startup()
+            }
         }
-
-
-
     }
 
-    fun startup(){
+    override fun onLocationChanged(location: Location) {
+        if (!isDone) {
+            val latLng = LatLng(location.latitude, location.longitude)
+            mMap.clear()
+            mMap.addMarker(MarkerOptions().position(latLng))
+            tv_coords.text = latLng.toString()
+
+            if (isOnLocation(location)) {
+                goToNextLocation()
+            }
+        }
+    }
+
+    fun startup() {
         requestPerms()
         buildDialogRiddle()
 
@@ -140,22 +160,14 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Co
         mMap = googleMap
     }
 
-    override fun onLocationChanged(location: Location) {
-        val latLng = LatLng(location.latitude, location.longitude)
-        mMap.clear()
-        mMap.addMarker(MarkerOptions().position(latLng))
-        tv_coords.text = latLng.toString()
-
-        if (isOnLocation(location)) {
-            goToNextLocation()
-        }
-    }
 
     fun goToNextLocation() {
-        if (currentIteration == 0){
+        if (currentIteration == 0) {
             val startTime = Calendar.getInstance().timeInMillis
             sp!!.edit().putLong("start_time", startTime).apply()
         }
+        appendLetter(riddles[currentIteration].letter!!)
+        popupContext!!.lettersTV.text = sp!!.getString("letters", "")
         currentIteration++
         showDialog()
         sp!!.edit().putInt("currentIteration", currentIteration).apply()
@@ -175,21 +187,56 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Co
             vibratePhone()
             dialog!!.show()
         } catch (e: IndexOutOfBoundsException) {
-            goToCredits()
+            guessWord()
         }
     }
 
+    fun guessWord() {
+        try {
+            LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, this)
+            googleApiClient!!.disconnect()
+        } catch (ignored: Exception) {
+        }
+
+        val builder = AlertDialog.Builder(this)
+        val layoutInflater = LayoutInflater.from(this)
+        val guessContext = layoutInflater.inflate(R.layout.dialog_guess_word, null)
+        builder.setView(guessContext)
+        builder.setCancelable(false)
+        val dialogGuess = builder.create()
+        sp!!.edit().putBoolean("isDone", true).apply()
+        guess_word_button.apply {
+            this.setBackgroundColor(resources.getColor(R.color.colorPrimaryDark))
+            isEnabled = true
+            setOnClickListener {
+                guessContext.letters_in_dialog.text = sp!!.getString("letters", "")
+                dialogGuess.show()
+                guessContext.guess_word_in_dialog_button.setOnClickListener {
+                    val word = guessContext.et_letters.text.toString()
+                    if (word.toLowerCase(Locale.ROOT) == "in kofferbak") {
+                        goToCredits()
+                    } else {
+                        createSnackbar(it, "Fout...")
+//                        Toast.makeText(applicationContext, "Fout...", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        }
+    }
+
+    fun createSnackbar(view: View, msg: String){
+        Snackbar.make(view, msg, Snackbar.LENGTH_SHORT).show()
+    }
+
+
     fun goToCredits(){
-        sp!!.edit().putBoolean("isCompleted", true).apply()
         sp!!.edit().putLong("end_time", Calendar.getInstance().timeInMillis).apply()
-        LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, this)
-        googleApiClient!!.disconnect()
+        sp!!.edit().putBoolean("isCompleted", true).apply()
         val i = Intent(this, DoneActivity::class.java)
         startActivity(i)
     }
 
     fun isOnLocation(location: Location): Boolean {
-
         val locCheck = Location(LocationManager.GPS_PROVIDER)
         locCheck.latitude = riddles[currentIteration].coordinates!!.latitude
         locCheck.longitude = riddles[currentIteration].coordinates!!.longitude
@@ -200,8 +247,22 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Co
 
     override fun onConnected(p0: Bundle?) {
         val location = LocationServices.FusedLocationApi.getLastLocation(googleApiClient)
-        setupMap(location)
-        startLocationUpdates()
+        if (location != null) {
+            setupMap(location)
+            startLocationUpdates()
+        } else {
+            if (ActivityCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                Toast.makeText(
+                    this,
+                    "You need to enable permissions to display your location!",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
     }
 
     fun setupMap(location: Location) {
@@ -227,6 +288,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Co
         popupContext = layoutInflater.inflate(R.layout.dialog_riddle, null)
         builder.setView(popupContext)
         dialog = builder.create()
+
+        popupContext!!.lettersTV.text = sp!!.getString("letters", "")
     }
 
     fun requestPerms() {
@@ -246,9 +309,16 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Co
         }
     }
 
+    fun appendLetter(letter: String) {
+        var letters = sp!!.getString("letters", "")
+        letters += letter
+        sp!!.edit().putString("letters", letters).apply()
+    }
+
     override fun onConnectionSuspended(p0: Int) {
     }
 
     override fun onConnectionFailed(p0: ConnectionResult) {
     }
 }
+

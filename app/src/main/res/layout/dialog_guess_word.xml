@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorPrimaryDark"
+    android:padding="20dp">
+
+    <TextView
+        android:id="@+id/letters_in_dialog"
+        android:layout_width="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:textSize="20sp"
+        android:letterSpacing="0.5"
+        android:textColor="@color/white"
+        android:layout_height="wrap_content"/>
+
+    <EditText
+        android:id="@+id/et_letters"
+        android:layout_width="200dp"
+        android:layout_below="@+id/letters_in_dialog"
+        android:layout_height="wrap_content"
+        android:maxLength="12"
+        android:layout_marginTop="25dp"
+        android:layout_marginBottom="25dp"
+        android:textAlignment="center"
+        android:textColor="@color/white"
+        android:textSize="20sp"
+        android:hint="Voer hier je woord in"
+        android:textColorHint="@color/inactive"
+        android:backgroundTint="@color/white"
+        android:layout_centerHorizontal="true"/>
+
+    <Button
+        android:id="@+id/guess_word_in_dialog_button"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:text="@string/guess"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/et_letters"
+        android:background="@color/colorPrimary"
+        android:textColor="@color/white"/>
+
+</RelativeLayout>

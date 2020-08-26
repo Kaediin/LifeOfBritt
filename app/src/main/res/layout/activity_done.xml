@@ -45,14 +45,14 @@
 
     <Button
         android:id="@+id/opnieuw_spelen_button"
-        android:layout_width="wrap_content"
+        android:layout_width="200dp"
         android:layout_height="wrap_content"
         android:layout_below="@id/totalTimeTV"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="20dp"
-        android:background="@color/white"
+        android:background="@color/colorPrimary"
         android:text="@string/opnieuw_beginnen"
-        android:textColor="@color/black"
+        android:textColor="@color/white"
         android:elevation="20dp"
         android:padding="10dp" />
 

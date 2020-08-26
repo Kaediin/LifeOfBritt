@@ -29,6 +29,8 @@ class DoneActivity : AppCompatActivity(){
 
         opnieuw_spelen_button.setOnClickListener {
             sp.edit().putBoolean("isCompleted", false).apply()
+            sp.edit().putBoolean("isDone", false).apply()
+            sp.edit().putString("letters", "").apply()
             sp.edit().putInt("currentIteration", 0).apply()
             startActivity(Intent(this, MapsActivity::class.java))
         }

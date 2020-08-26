@@ -12,6 +12,8 @@ object Data {
         return Bitmap.createScaledBitmap(imageBitmap, 65, 110, false)
     }
 
+//    var letters = ""
+
     fun getAllLocations(): MutableList<Location>{
         val list = ArrayList<Location>()
         val locationStart = Location("Riddle here", "", LatLng(52.37897135914867, 5.2356307581067085), "Start")
