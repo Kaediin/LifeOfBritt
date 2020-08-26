@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">LifeOfBritt</string>
+    <string name="title_activity_maps">Life of Britt</string>
+    <string name="loading">Loading...</string>
+    <string name="gefeliciteerd">Gefeliciteerd!</string>
+    <string name="totale_tijd">Totale tijd:</string>
+    <string name="opnieuw_beginnen">Opnieuw beginnen</string>
+</resources>
