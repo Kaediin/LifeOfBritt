@@ -192,7 +192,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Co
         }
         try {
             currentRiddle = riddles[currentIteration]
-            popupContext!!.riddle.text = currentRiddle.name
+            popupContext!!.riddle.text = currentRiddle.riddle
             vibratePhone()
             dialog!!.show()
         } catch (e: IndexOutOfBoundsException) {
