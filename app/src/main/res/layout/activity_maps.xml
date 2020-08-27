@@ -24,12 +24,12 @@
         android:visibility="gone"
         android:contentDescription="test" />
 
-    <TextView
-        android:id="@+id/tv_coords"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="20sp"
-        android:textStyle="bold"/>
+<!--    <TextView-->
+<!--        android:id="@+id/tv_coords"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:textSize="20sp"-->
+<!--        android:textStyle="bold"/>-->
 
     <Button
         android:id="@+id/guess_word_button"

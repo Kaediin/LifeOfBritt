@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
+import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.location.Location
 import android.location.LocationManager
@@ -30,6 +31,8 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.BitmapDescriptor
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.material.snackbar.Snackbar
@@ -90,7 +93,14 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Co
             val latLng = LatLng(location.latitude, location.longitude)
             mMap.clear()
             mMap.addMarker(MarkerOptions().position(latLng))
-            tv_coords.text = latLng.toString()
+
+            mMap.addMarker(MarkerOptions().position(riddles[currentIteration].coordinates!!).icon(BitmapDescriptorFactory.fromBitmap(Data.resizeMapIcons(this, "marker_blue"))))
+//            for (riddle in riddles){
+//                mMap.addMarker(MarkerOptions().position(riddle.coordinates!!)
+//                    .icon(BitmapDescriptorFactory.fromBitmap(Data.resizeMapIcons(this, "marker_blue"))))
+//            }
+
+//            tv_coords.text = latLng.toString()
 
             if (isOnLocation(location)) {
                 goToNextLocation()
@@ -99,7 +109,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Co
     }
 
     fun startup() {
-        requestPerms()
         buildDialogRiddle()
 
         image_riddle_button.setOnClickListener {
@@ -292,22 +301,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Co
         popupContext!!.lettersTV.text = sp!!.getString("letters", "")
     }
 
-    fun requestPerms() {
-        if (ActivityCompat.checkSelfPermission(
-                this, Manifest.permission.ACCESS_FINE_LOCATION
-            ) !=
-            PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                this, Manifest.permission.ACCESS_COARSE_LOCATION
-            ) !=
-            PackageManager.PERMISSION_GRANTED
-        ) {
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 200
-            )
-            return
-        }
-    }
+
 
     fun appendLetter(letter: String) {
         var letters = sp!!.getString("letters", "")
