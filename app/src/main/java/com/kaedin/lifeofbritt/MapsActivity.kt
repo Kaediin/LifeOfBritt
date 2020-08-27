@@ -94,7 +94,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Co
             mMap.clear()
             mMap.addMarker(MarkerOptions().position(latLng))
 
-            mMap.addMarker(MarkerOptions().position(riddles[currentIteration].coordinates!!).icon(BitmapDescriptorFactory.fromBitmap(Data.resizeMapIcons(this, "marker_blue"))))
+//            mMap.addMarker(MarkerOptions().position(riddles[currentIteration].coordinates!!).icon(BitmapDescriptorFactory.fromBitmap(Data.resizeMapIcons(this, "marker_blue"))))
 //            for (riddle in riddles){
 //                mMap.addMarker(MarkerOptions().position(riddle.coordinates!!)
 //                    .icon(BitmapDescriptorFactory.fromBitmap(Data.resizeMapIcons(this, "marker_blue"))))
